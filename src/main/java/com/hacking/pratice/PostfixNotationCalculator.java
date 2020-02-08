@@ -1,29 +1,24 @@
 package com.hacking.pratice;
 
-import com.sun.javadoc.Doclet;
+import com.google.common.collect.ImmutableMap;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
-import java.util.function.BiFunction;
+import java.util.function.DoubleBinaryOperator;
 
 public class PostfixNotationCalculator {
 
-    private Map<String, BiFunction<Double, Double, Double>> operationsMap;
-
-    public PostfixNotationCalculator() {
-        initiateOperationsMapping();
-    }
+    private static final Map<String, DoubleBinaryOperator> operationsMap = initiateOperationsMapping();
 
     public double calculate(String expression){
         expression = expression.trim().replace(" ","");
-        Stack<Double> operands = new Stack<>();
+        ArrayDeque<Double> operands = new ArrayDeque<>();
         Arrays.stream(expression.split(""))
                 .forEach(s -> {
-                    final BiFunction<Double, Double, Double> operation = operationsMap.get(s);
+                    final DoubleBinaryOperator operation = operationsMap.get(s);
                     if(operation != null){
-                        final Double result = operation.apply(operands.pop(), operands.pop());
+                        final Double result = operation.applyAsDouble(operands.pop(), operands.pop());
                         operands.push(result);
 
                     }else {
@@ -33,11 +28,12 @@ public class PostfixNotationCalculator {
         return operands.peek();
     }
 
-    public void initiateOperationsMapping(){
-        operationsMap = new HashMap<>();
-        operationsMap.put("+", (a,b) -> b + a);
-        operationsMap.put("-", (a,b) -> b - a);
-        operationsMap.put("*", (a,b) -> b * a);
-        operationsMap.put("/", (a,b) -> b / a);
+    private static Map<String, DoubleBinaryOperator> initiateOperationsMapping(){
+        return ImmutableMap.<String, DoubleBinaryOperator>builder()
+                .put("+", (a,b) -> b + a)
+                .put("-", (a,b) -> b - a)
+                .put("*", (a,b) -> b * a)
+                .put("/", (a,b) -> b / a)
+                .build();
     }
 }
